@@ -15,7 +15,15 @@ interface BatchState {
 interface BatchActions {
   fetchBatches: (params?: { buyerId?: string; farmerId?: string; status?: BatchStatus } & PaginationParams) => Promise<void>;
   getBatchById: (id: string) => Promise<Batch | null>;
-  scanBatch: (data: { traceCode: string; buyerId: string }) => Promise<Batch>;
+  scanPrecheck: (params: { traceCode: string; buyerId: string }) => Promise<any>;
+  confirmBatch: (data: { 
+    traceCode: string; 
+    buyerId: string;
+    quantity: number;
+    unitPrice: number;
+    precheckStatus: 'pass' | 'warning' | 'fail';
+    precheckDetails: any;
+  }) => Promise<Batch>;
   updateBatchStatus: (id: string, status: BatchStatus) => Promise<void>;
   setCurrentBatch: (batch: Batch | null) => void;
   clearError: () => void;
@@ -65,10 +73,25 @@ export const useBatchStore = create<BatchState & BatchActions>((set, get) => ({
     }
   },
 
-  scanBatch: async (data) => {
+  scanPrecheck: async (params) => {
     set({ loading: true, error: null });
     try {
-      const batch = await api.scanBatch(data);
+      const result = await api.scanPrecheck(params);
+      set({ loading: false });
+      return result;
+    } catch (err) {
+      set({
+        error: err instanceof Error ? err.message : '预检失败',
+        loading: false,
+      });
+      throw err;
+    }
+  },
+
+  confirmBatch: async (data) => {
+    set({ loading: true, error: null });
+    try {
+      const batch = await api.confirmBatch(data);
       const { batches } = get();
       set({
         batches: [batch, ...batches],
@@ -78,7 +101,7 @@ export const useBatchStore = create<BatchState & BatchActions>((set, get) => ({
       return batch;
     } catch (err) {
       set({
-        error: err instanceof Error ? err.message : '批次扫描失败',
+        error: err instanceof Error ? err.message : '确认收购失败',
         loading: false,
       });
       throw err;

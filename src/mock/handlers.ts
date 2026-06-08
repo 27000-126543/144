@@ -910,6 +910,29 @@ export const handlers = [
     localMessages[index].readAt = new Date().toISOString();
     return successResponse<Message>(localMessages[index], '消息已标记为已读');
   }),
+
+  http.put('/api/messages/read-all', async ({ request }) => {
+    const body = await request.json();
+    const { userId } = body;
+    const now = new Date().toISOString();
+    localMessages.forEach((m) => {
+      if (m.userId === userId && !m.isRead) {
+        m.isRead = true;
+        m.readAt = now;
+      }
+    });
+    return successResponse<void>(undefined, '所有消息已标记为已读');
+  }),
+
+  http.get('/api/messages/unread-count', ({ request }) => {
+    const url = new URL(request.url);
+    const userId = url.searchParams.get('userId');
+    let count = 0;
+    if (userId) {
+      count = localMessages.filter((m) => m.userId === userId && !m.isRead).length;
+    }
+    return successResponse<number>(count);
+  }),
 ];
 
 export default handlers;

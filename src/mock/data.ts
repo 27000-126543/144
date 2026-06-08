@@ -256,11 +256,17 @@ export const generateBatches = (
         const pesticide = faker.helpers.arrayElement(pesticideNames);
         const standard = parseFloat(faker.number.float({ min: 0.01, max: 0.5, fractionDigits: 3 }).toFixed(3));
         const value = parseFloat(faker.number.float({ min: 0, max: precheckStatus === 'fail' ? standard * 2 : standard * 0.8, fractionDigits: 3 }).toFixed(3));
+        const ratio = value / standard;
+        let result: 'normal' | 'warning' | 'exceed';
+        if (ratio <= 0.8) result = 'normal';
+        else if (ratio <= 1.0) result = 'warning';
+        else result = 'exceed';
         return {
           item: pesticide,
           value,
           standard,
-          result: value <= standard ? '合格' : '不合格',
+          unit: 'mg/kg',
+          result,
         };
       }),
       overall: precheckStatus === 'pass' ? '合格' : precheckStatus === 'warning' ? '警告' : '不合格',

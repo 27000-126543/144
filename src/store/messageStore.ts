@@ -73,12 +73,10 @@ export const useMessageStore = create<MessageState & MessageActions>((set, get) 
     set({ loading: true, error: null });
     try {
       await api.markAllMessagesAsRead(userId);
-      const { messages } = get();
-      set({
-        messages: messages.map((m) => ({ ...m, isRead: true, readAt: new Date().toISOString() })),
-        unreadCount: 0,
-        loading: false,
-      });
+      const { fetchMessages, getUnreadCount } = get();
+      await fetchMessages({ userId, page: 1, pageSize: get().pageSize });
+      await getUnreadCount(userId);
+      set({ loading: false });
     } catch (err) {
       set({
         error: err instanceof Error ? err.message : '全部标记已读失败',

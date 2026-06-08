@@ -33,7 +33,7 @@ interface ScanResult {
   pesticideRecords: PesticideRecord[];
   precheckResult: 'pass' | 'warning' | 'fail';
   precheckDetails: {
-    pesticideResidue: Array<{ item: string; value: number; standard: number; unit: string; result: 'normal' | 'warning' | 'exceed' }>;
+    pesticideResidue: Array<{ item: string; value: number; standard: number; unit: string; result: string }>;
     overall: string;
   };
 }
@@ -99,11 +99,11 @@ export default function BuyerScan() {
 
   async function handleScanSuccess(code: string) {
     await stopScanner();
-    setLastCode(code);
     await performScan(code);
   }
 
   async function performScan(code: string) {
+    setLastCode(code);
     try {
       const result = await api.scanPrecheck({ traceCode: code, buyerId: user!.id });
       
