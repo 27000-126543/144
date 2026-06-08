@@ -44,20 +44,91 @@ import {
 
 faker.seed(12345);
 
+const STORAGE_KEY = 'agri-trace-mock-data';
+
+function loadMockData() {
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      return JSON.parse(saved);
+    }
+  } catch {
+    // ignore
+  }
+  return null;
+}
+
+function saveMockData() {
+  try {
+    const data = {
+      localCertificationApplications,
+      localCertificates,
+      localBatches,
+      localTraceCodes,
+      localMessages,
+      localSubsidies,
+      localInspectionTasks,
+      localInspectionReports,
+      localComplaints,
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore
+  }
+}
+
+function initMockData() {
+  const saved = loadMockData();
+  if (saved) {
+    return {
+      localPlots: [...plots],
+      localPlantings: [...plantings],
+      localPesticideRecords: [...pesticideRecords],
+      localTraceCodes: saved.localTraceCodes || [...traceCodes],
+      localSubsidies: saved.localSubsidies || [...subsidies],
+      localBatches: saved.localBatches || [...batches],
+      localInspectionTasks: saved.localInspectionTasks || [...inspectionTasks],
+      localInspectionReports: saved.localInspectionReports || [...inspectionReports],
+      localCertificationApplications: saved.localCertificationApplications || [...certificationApplications],
+      localCertificates: saved.localCertificates || [...certificates],
+      localComplaints: saved.localComplaints || [...complaints],
+      localThresholds: [...thresholds],
+      localMessages: saved.localMessages || [...messages],
+    };
+  }
+  return {
+    localPlots: [...plots],
+    localPlantings: [...plantings],
+    localPesticideRecords: [...pesticideRecords],
+    localTraceCodes: [...traceCodes],
+    localSubsidies: [...subsidies],
+    localBatches: [...batches],
+    localInspectionTasks: [...inspectionTasks],
+    localInspectionReports: [...inspectionReports],
+    localCertificationApplications: [...certificationApplications],
+    localCertificates: [...certificates],
+    localComplaints: [...complaints],
+    localThresholds: [...thresholds],
+    localMessages: [...messages],
+  };
+}
+
+const initialData = initMockData();
+
 let currentUser: User | null = null;
-let localPlots = [...plots];
-let localPlantings = [...plantings];
-let localPesticideRecords = [...pesticideRecords];
-let localTraceCodes = [...traceCodes];
-let localSubsidies = [...subsidies];
-let localBatches = [...batches];
-let localInspectionTasks = [...inspectionTasks];
-let localInspectionReports = [...inspectionReports];
-let localCertificationApplications = [...certificationApplications];
-let localCertificates = [...certificates];
-let localComplaints = [...complaints];
-let localThresholds = [...thresholds];
-let localMessages = [...messages];
+let localPlots = initialData.localPlots;
+let localPlantings = initialData.localPlantings;
+let localPesticideRecords = initialData.localPesticideRecords;
+let localTraceCodes = initialData.localTraceCodes;
+let localSubsidies = initialData.localSubsidies;
+let localBatches = initialData.localBatches;
+let localInspectionTasks = initialData.localInspectionTasks;
+let localInspectionReports = initialData.localInspectionReports;
+let localCertificationApplications = initialData.localCertificationApplications;
+let localCertificates = initialData.localCertificates;
+let localComplaints = initialData.localComplaints;
+let localThresholds = initialData.localThresholds;
+let localMessages = initialData.localMessages;
 
 const successResponse = <T>(data: T, message = 'success'): HttpResponse<ApiResponse<T>> => {
   return HttpResponse.json({
@@ -456,6 +527,8 @@ export const handlers = [
     traceCodeRecord.status = 'used';
     localBatches.unshift(newBatch);
 
+    saveMockData();
+
     return successResponse<Batch>(newBatch, '收购确认成功');
   }),
 
@@ -576,6 +649,8 @@ export const handlers = [
       reviewedAt: body.status ? new Date().toISOString() : localCertificationApplications[index].reviewedAt,
     };
     
+    saveMockData();
+    
     return successResponse<CertificationApplication>(
       localCertificationApplications[index], 
       '认证申请更新成功'
@@ -653,6 +728,8 @@ export const handlers = [
       localBatches[batchIndex].certificateId = newCertificate.id;
       localBatches[batchIndex].status = 'certified';
     }
+
+    saveMockData();
 
     return successResponse<Certificate>(newCertificate, '证书生成成功');
   }),
@@ -908,11 +985,12 @@ export const handlers = [
     }
     localMessages[index].isRead = true;
     localMessages[index].readAt = new Date().toISOString();
+    saveMockData();
     return successResponse<Message>(localMessages[index], '消息已标记为已读');
   }),
 
   http.put('/api/messages/read-all', async ({ request }) => {
-    const body = await request.json();
+    const body = (await request.json()) as { userId: string };
     const { userId } = body;
     const now = new Date().toISOString();
     localMessages.forEach((m) => {
@@ -921,6 +999,7 @@ export const handlers = [
         m.readAt = now;
       }
     });
+    saveMockData();
     return successResponse<void>(undefined, '所有消息已标记为已读');
   }),
 

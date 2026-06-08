@@ -189,7 +189,7 @@ export default function BuyerBatches() {
                           />
                         </div>
                         <p className="text-sm text-gray-500 mt-1">
-                          {formatDate(batch.purchaseDate)} · {formatWeight(batch.quantity)} · {formatCurrency(batch.totalAmount)}
+                          {formatDate(batch.purchaseDate)} · {formatWeight(batch.quantity)} · {formatCurrency(batch.unitPrice)}/kg · {formatCurrency(batch.totalAmount)}
                         </p>
                       </div>
                     </div>
@@ -218,7 +218,7 @@ export default function BuyerBatches() {
                       className="overflow-hidden bg-gray-50"
                     >
                       <div className="p-5 border-t border-gray-100">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
                           <div className="p-4 bg-white rounded-xl">
                             <div className="flex items-center gap-2 text-gray-500 mb-2">
                               <Hash className="w-4 h-4" />
@@ -239,6 +239,28 @@ export default function BuyerBatches() {
                               <span className="text-sm">作物品种</span>
                             </div>
                             <p className="font-medium">西红柿</p>
+                          </div>
+                          <div className="p-4 bg-white rounded-xl">
+                            <div className="flex items-center gap-2 text-gray-500 mb-2">
+                              <Package className="w-4 h-4" />
+                              <span className="text-sm">收购重量</span>
+                            </div>
+                            <p className="font-medium">{formatWeight(batch.quantity)}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                          <div className="p-4 bg-green-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-green-600 mb-2">
+                              <span className="text-sm font-medium">单价</span>
+                            </div>
+                            <p className="text-2xl font-bold text-green-600">{formatCurrency(batch.unitPrice)}/kg</p>
+                          </div>
+                          <div className="p-4 bg-emerald-50 rounded-xl">
+                            <div className="flex items-center gap-2 text-emerald-600 mb-2">
+                              <span className="text-sm font-medium">总金额</span>
+                            </div>
+                            <p className="text-2xl font-bold text-emerald-600">{formatCurrency(batch.totalAmount)}</p>
                           </div>
                         </div>
 
@@ -315,7 +337,7 @@ export default function BuyerBatches() {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="p-4 bg-gray-50 rounded-xl">
                 <div className="flex items-center gap-2 text-gray-500 mb-1">
                   <Calendar className="w-4 h-4" />
@@ -337,12 +359,18 @@ export default function BuyerBatches() {
                 </div>
                 <p className="font-medium">{formatWeight(selectedBatch.quantity)}</p>
               </div>
-              <div className="p-4 bg-gray-50 rounded-xl">
-                <div className="flex items-center gap-2 text-gray-500 mb-1">
-                  <Hash className="w-4 h-4" />
-                  <span className="text-xs">总金额</span>
+              <div className="p-4 bg-green-50 rounded-xl">
+                <div className="flex items-center gap-2 text-green-600 mb-1">
+                  <span className="text-xs font-medium">单价</span>
                 </div>
-                <p className="font-medium">{formatCurrency(selectedBatch.totalAmount)}</p>
+                <p className="font-medium text-green-600">{formatCurrency(selectedBatch.unitPrice)}/kg</p>
+              </div>
+            </div>
+
+            <div className="p-4 bg-emerald-50 rounded-xl">
+              <div className="flex justify-between items-center">
+                <span className="text-emerald-600 font-medium">总金额</span>
+                <span className="text-3xl font-bold text-emerald-600">{formatCurrency(selectedBatch.totalAmount)}</span>
               </div>
             </div>
 
